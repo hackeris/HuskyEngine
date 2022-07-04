@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuskyEngine", "HuskyEngine\HuskyEngine.csproj", "{20E4DB5F-9B87-4A43-9729-2F8109820709}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuskyEngine.Tests", "HuskyEngine.Tests\HuskyEngine.Tests.csproj", "{AA9AD21D-FCD9-443C-9112-9AF2D276FB34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{20E4DB5F-9B87-4A43-9729-2F8109820709}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20E4DB5F-9B87-4A43-9729-2F8109820709}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20E4DB5F-9B87-4A43-9729-2F8109820709}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20E4DB5F-9B87-4A43-9729-2F8109820709}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA9AD21D-FCD9-443C-9112-9AF2D276FB34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA9AD21D-FCD9-443C-9112-9AF2D276FB34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA9AD21D-FCD9-443C-9112-9AF2D276FB34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA9AD21D-FCD9-443C-9112-9AF2D276FB34}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
