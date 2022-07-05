@@ -1,6 +1,7 @@
 using Antlr4.Runtime;
-using HuskyEngine.Engine.Evaluator;
+using HuskyEngine.Engine.Context;
 using HuskyEngine.Engine.Parser;
+using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Types;
 
 namespace HuskyEngine.Tests;
@@ -19,19 +20,26 @@ public class ParseExpressionTest
         var parser = new HuskyLangParser(tokens);
         var tree = parser.statement();
 
-        var pred = new HuskyPredefine();
+        var pred = new Predefine();
 
-        pred.Register("a", new ScalarType(PrimitiveType.Integer));
-        pred.Register("b", new ScalarType(PrimitiveType.Integer));
-        pred.Register("sum", new FuncType(new List<IType>
+        var integerScalar = new ScalarType(PrimitiveType.Integer);
+
+        pred.Register("a", integerScalar);
+        pred.Register("b", integerScalar);
+        pred.Register("sum", new FunctionType(new List<IType>
         {
-            new ScalarType(PrimitiveType.Integer),
-            new ScalarType(PrimitiveType.Integer)
-        }, new ScalarType(PrimitiveType.Integer)));
+            integerScalar,
+            integerScalar
+        }, integerScalar));
 
         var visitor = new HuskyParser(pred);
         var exp = visitor.Visit(tree);
 
-        Console.WriteLine("exp is " + exp);
+        Assert.IsTrue(exp is FunctionCall);
+
+        var fc = (FunctionCall)exp;
+        Assert.IsTrue(fc.Arguments[0].Type == integerScalar);
+        Assert.IsTrue(fc.Arguments[1].Type == integerScalar);
+        Assert.IsTrue(fc.Type == integerScalar);
     }
 }

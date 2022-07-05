@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime;
+using HuskyEngine.Engine.Context;
 using HuskyEngine.Engine.Parser.Errors;
 using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Types;
@@ -104,15 +105,13 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
     {
         var functionName = context.functionName.GetText();
 
-        var funcType = (FuncType)_predefine.GetType(functionName);
-
         var arguments = UnfoldArgList(context.argList());
-
         var argTypes = (
             from arg in arguments
             select arg.Type
         ).ToList();
-        if (funcType.Arguments != argTypes)
+        var funcType = _predefine.GetFunctionType(functionName, argTypes);
+        if (funcType == null)
         {
             //  TODO: argument type mismatch error
         }
@@ -144,6 +143,8 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
     {
         var indexable = Visit(context.indexable);
         var index = Visit(context.index);
+
+
         return new Indexing
         {
             Indexable = indexable,
@@ -156,6 +157,10 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         var name = context.identifier().ID().GetText();
 
         var type = _predefine.GetType(name);
+        if (type == null)
+        {
+            //  TODO: could not find identifier
+        }
 
         return new Identifier(name, type);
     }
@@ -225,5 +230,17 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
     public override IExpression VisitBraces(HuskyLangParser.BracesContext context)
     {
         return Visit(context.expression());
+    }
+
+    public static IExpression Parse(string code, IPredefine pred)
+    {
+        var stream = new AntlrInputStream(code);
+        var lexer = new HuskyLangLexer(stream);
+        var tokens = new CommonTokenStream(lexer);
+        var parser = new HuskyLangParser(tokens);
+        var tree = parser.statement();
+
+        var visitor = new HuskyParser(pred);
+        return visitor.Visit(tree);
     }
 }

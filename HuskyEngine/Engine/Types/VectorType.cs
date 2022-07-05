@@ -1,8 +1,8 @@
 ﻿namespace HuskyEngine.Engine.Types;
 
-public class VecType : IType
+public class VectorType : IType
 {
-    public VecType(PrimitiveType elementType)
+    public VectorType(PrimitiveType elementType)
     {
         ElementType = elementType;
     }

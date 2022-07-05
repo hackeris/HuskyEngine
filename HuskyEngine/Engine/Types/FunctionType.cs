@@ -1,8 +1,8 @@
 ﻿namespace HuskyEngine.Engine.Types;
 
-public class FuncType : IType
+public class FunctionType : IType
 {
-    public FuncType(List<IType> arguments, IType returnType)
+    public FunctionType(List<IType> arguments, IType returnType)
     {
         Arguments = arguments;
         ReturnType = returnType;
@@ -11,7 +11,7 @@ public class FuncType : IType
     public List<IType> Arguments { get; }
     public IType ReturnType { get; }
 
-    protected bool Equals(FuncType other)
+    protected bool Equals(FunctionType other)
     {
         return Arguments.Equals(other.Arguments) && ReturnType.Equals(other.ReturnType);
     }
@@ -21,7 +21,7 @@ public class FuncType : IType
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != this.GetType()) return false;
-        return Equals((FuncType)obj);
+        return Equals((FunctionType)obj);
     }
 
     public override int GetHashCode()
