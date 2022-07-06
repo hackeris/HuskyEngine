@@ -1,6 +1,7 @@
-﻿using HuskyEngine.Engine.Types;
+﻿using HuskyEngine.Engine.Runtime;
+using HuskyEngine.Engine.Types;
 
-namespace HuskyEngine.Engine.Runtime;
+namespace HuskyEngine.Engine.Value;
 
 public class BoolVector : IVector
 {

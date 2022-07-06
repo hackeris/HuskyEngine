@@ -1,6 +1,6 @@
 ﻿using HuskyEngine.Engine.Types;
 
-namespace HuskyEngine.Engine.Runtime;
+namespace HuskyEngine.Engine.Value;
 
 public interface IValue
 {

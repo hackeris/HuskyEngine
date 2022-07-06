@@ -1,15 +1,15 @@
-﻿using HuskyEngine.Engine.Runtime;
-using HuskyEngine.Engine.Semantic;
+﻿using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Types;
+using HuskyEngine.Engine.Value;
 
 namespace HuskyEngine.Engine.Context;
 
-public class RuntimeProxy : IRuntime
+public class OffsetProxy : IRuntime
 {
     private readonly IRuntime _proxied;
     private readonly int _offset;
 
-    public RuntimeProxy(IRuntime proxied, int offset)
+    public OffsetProxy(IRuntime proxied, int offset)
     {
         _proxied = proxied;
         _offset = offset;
@@ -38,5 +38,10 @@ public class RuntimeProxy : IRuntime
                 }),
             _ => _proxied.Eval(expression)
         };
+    }
+
+    public IPredefine GetPredefine()
+    {
+        return _proxied.GetPredefine();
     }
 }
