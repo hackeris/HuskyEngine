@@ -1,5 +1,4 @@
 using HuskyEngine.Engine.Context;
-using HuskyEngine.Engine.Runtime;
 using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Types;
 using HuskyEngine.Engine.Value;
@@ -14,4 +13,9 @@ public class RankFunction : IFunction
     }
 
     public IType Type => new VectorType(PrimitiveType.Integer);
+
+    public List<IType> ArgTypes => new()
+    {
+        new VectorType(PrimitiveType.Number)
+    };
 }

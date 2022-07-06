@@ -1,5 +1,4 @@
-﻿using HuskyEngine.Engine.Runtime;
-using HuskyEngine.Engine.Semantic;
+﻿using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Types;
 using HuskyEngine.Engine.Value;
 
@@ -9,6 +8,7 @@ public interface IFunction
 {
     public IValue Call(IRuntime runtime, List<IExpression> arguments);
     public IType Type { get; }
+    public List<IType> ArgTypes { get; }
 
     public class Id
     {

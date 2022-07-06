@@ -1,44 +1,59 @@
-﻿using HuskyEngine.Engine.Semantic;
+﻿using HuskyEngine.Data.Source;
+using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Types;
 
 namespace HuskyEngine.Engine.Context;
 
 public class Predefine : IPredefine
 {
-    public Predefine()
+    public Predefine(
+        DataSource dataSource,
+        Dictionary<IFunction.Id, IFunction> functions
+    )
     {
-        _types = new Dictionary<string, IType>();
+        _dataDataSource = dataSource;
+        _functions = functions;
     }
 
     public IType? GetType(string symbol)
     {
-        return _types[symbol];
+        return _dataDataSource.Exist(symbol)
+            ? new VectorType(PrimitiveType.Number)
+            : null;
     }
 
     public FunctionType? GetFunctionType(string symbol, List<IType> arguments)
     {
-        return (FunctionType)_types[symbol];
+        var key = new IFunction.Id
+        {
+            Name = symbol,
+            ArgTypes = arguments
+        };
+
+        return _functions.TryGetValue(key, out var found)
+            ? new FunctionType(found.ArgTypes, found.Type)
+            : null;
     }
 
     public IType? GetIndexingType(IType indexable, IType index)
     {
-        return null;
+        return index switch
+        {
+            ScalarType { Type: PrimitiveType.Integer } => indexable,
+            _ => GetFunctionType("[]", new List<IType> { indexable, index })
+        };
     }
 
     public IType? GetBinaryType(IType left, Operation.Binary op, IType right)
     {
-        return null;
+        return GetFunctionType(Operation.NameOf(op), new List<IType> { left, right });
     }
 
     public IType? GetUnaryType(Operation.Unary op, IType operand)
     {
-        return null;
+        return GetFunctionType(Operation.NameOf(op), new List<IType> { operand });
     }
 
-    public void Register(string symbol, IType type)
-    {
-        _types.Add(symbol, type);
-    }
-
-    private readonly Dictionary<string, IType> _types;
+    private readonly DataSource _dataDataSource;
+    private readonly Dictionary<IFunction.Id, IFunction> _functions;
 }

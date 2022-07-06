@@ -21,20 +21,23 @@ public class OffsetProxy : IRuntime
         {
             Indexing
                 {
-                    Indexable: Identifier ident,
+                    Indexable: var left,
                     Index: Literal
                     {
                         Value: int index,
-                        Type: ScalarType
-                        {
-                            Type: PrimitiveType.Integer
-                        }
+                        Type: ScalarType { Type: PrimitiveType.Integer }
                     }
                 } =>
                 _proxied.Eval(new Indexing
                 {
-                    Indexable = ident,
+                    Indexable = left,
                     Index = new Literal(index + _offset)
+                }),
+            Identifier ident =>
+                _proxied.Eval(new Indexing
+                {
+                    Indexable = ident,
+                    Index = new Literal(_offset)
                 }),
             _ => _proxied.Eval(expression)
         };

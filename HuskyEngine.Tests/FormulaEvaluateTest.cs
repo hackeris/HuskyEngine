@@ -1,7 +1,8 @@
-﻿using HuskyEngine.Engine.Context;
+﻿using HuskyEngine.Data.Source;
+using HuskyEngine.Engine.Context;
+using HuskyEngine.Engine.Lib;
 using HuskyEngine.Engine.Parser;
 using HuskyEngine.Engine.Semantic;
-using HuskyEngine.Engine.Source;
 using HuskyEngine.Engine.Value;
 
 namespace HuskyEngine.Tests;
@@ -15,8 +16,10 @@ public class FormulaEvaluateTest
     {
         string formula = "earning / price";
 
-        var dataSource = new DataSource();
-        var runtime = new HuskyRuntime(dataSource, DateTime.Now);
+        var dataSource = new DataSource(DateTime.Now);
+        var runtime = new HuskyRuntime(dataSource);
+        
+        runtime.Register("+", new IntVecAdd());
 
         var pred = runtime.GetPredefine();
         IExpression expression = HuskyParser.Parse(formula, pred);

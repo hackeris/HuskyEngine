@@ -1,6 +1,6 @@
+using HuskyEngine.Data.Source;
 using HuskyEngine.Engine.Parser;
 using HuskyEngine.Engine.Semantic;
-using HuskyEngine.Engine.Source;
 using HuskyEngine.Engine.Types;
 using HuskyEngine.Engine.Value;
 
@@ -8,10 +8,9 @@ namespace HuskyEngine.Engine.Context;
 
 public class HuskyRuntime : IRuntime
 {
-    public HuskyRuntime(DataSource source, DateTime date)
+    public HuskyRuntime(DataSource source)
     {
         _source = source;
-        _date = date;
         _functions = new Dictionary<IFunction.Id, IFunction>();
     }
 
@@ -22,7 +21,7 @@ public class HuskyRuntime : IRuntime
             FunctionCall functionCall => Eval(functionCall),
             BinaryExpression binary => Eval(binary),
             UnaryExpression unary => Eval(unary),
-            Identifier ident => Eval(ident),
+            Identifier ident => Eval(ident, 0),
             Indexing indexing => Eval(indexing),
             Literal literal => Eval(literal),
             _ => throw new ArgumentOutOfRangeException(nameof(expression), expression, null)
@@ -47,6 +46,22 @@ public class HuskyRuntime : IRuntime
     }
 
     private IValue Eval(Indexing indexing)
+    {
+        return indexing switch
+        {
+            {
+                Indexable: var exp,
+                Index: Literal
+                {
+                    Value: int index,
+                    Type: ScalarType { Type: PrimitiveType.Integer }
+                }
+            } => ProxyOffset(exp, index),
+            _ => CallIndex(indexing)
+        };
+    }
+
+    private IValue CallIndex(Indexing indexing)
     {
         var funcId = new IFunction.Id
         {
@@ -102,21 +117,38 @@ public class HuskyRuntime : IRuntime
         return func.Call(this, new List<IExpression> { expression.Operand });
     }
 
-    private IValue Eval(Identifier identifier)
+    private IValue Eval(Identifier identifier, int offset)
     {
         var code = identifier.Name;
-        if (_source.IsFormula(code))
+        if (!_source.IsFormula(code))
         {
-            var formula = _source.GetFormula(code);
-            return Eval(HuskyParser.Parse(formula, GetPredefine()));
+            return new FloatVector { Values = _source.GetVector(code, offset) };
         }
-        else
-        {
-            return _source.GetVector(code, _date, 0);
-        }
+
+        var formula = _source.GetFormula(code);
+        var expression = HuskyParser.Parse(formula, GetPredefine());
+
+        return ProxyOffset(expression, offset);
     }
 
-    private readonly DateTime _date;
+    private IValue ProxyOffset(IExpression expression, int offset)
+    {
+        IRuntime runtime = offset != 0
+            ? new OffsetProxy(this, offset)
+            : this;
+        return runtime.Eval(expression);
+    }
+
+    public void Register(string name, IFunction function)
+    {
+        var key = new IFunction.Id
+        {
+            Name = name,
+            ArgTypes = function.ArgTypes
+        };
+        _functions.Add(key, function);
+    }
+
     private readonly DataSource _source;
     private readonly Dictionary<IFunction.Id, IFunction> _functions;
 }
