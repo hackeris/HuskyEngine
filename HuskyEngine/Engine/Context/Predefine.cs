@@ -24,23 +24,19 @@ public class Predefine : IPredefine
 
     public FunctionType? GetFunctionType(string symbol, List<IType> arguments)
     {
-        var key = new IFunction.Id
-        {
-            Name = symbol,
-            ArgTypes = arguments
-        };
+        var key = new IFunction.Id(symbol, arguments);
 
         return _functions.TryGetValue(key, out var found)
             ? new FunctionType(found.ArgTypes, found.Type)
             : null;
     }
 
-    public IType? GetIndexingType(IType indexable, IType index)
+    public IType? GetIndexingType(IType left, IType index)
     {
         return index switch
         {
-            ScalarType { Type: PrimitiveType.Integer } => indexable,
-            _ => GetFunctionType("[]", new List<IType> { indexable, index })
+            ScalarType { Type: PrimitiveType.Integer } => left,
+            _ => GetFunctionType("[]", new List<IType> { left, index })
         };
     }
 

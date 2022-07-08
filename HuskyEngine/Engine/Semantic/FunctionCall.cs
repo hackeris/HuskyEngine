@@ -11,14 +11,11 @@ public class FunctionCall : IExpression
 
     public IFunction.Id GetId()
     {
-        return new IFunction.Id
-        {
-            Name = Name,
-            ArgTypes = (
-                from argument
-                    in Arguments
-                select argument.Type
-            ).ToList()
-        };
+        var argTypes = (
+            from argument
+                in Arguments
+            select argument.Type
+        ).ToList();
+        return new IFunction.Id(Name, argTypes);
     }
 }

@@ -1,5 +1,4 @@
-﻿using HuskyEngine.Engine.Runtime;
-using HuskyEngine.Engine.Types;
+﻿using HuskyEngine.Engine.Types;
 
 namespace HuskyEngine.Engine.Value;
 
@@ -8,21 +7,30 @@ public class Scalar : IValue
     public Scalar(int value)
     {
         Value = value;
-        Type = new ScalarType(PrimitiveType.Integer);
+        ValueType = PrimitiveType.Integer;
     }
 
     public Scalar(float value)
     {
         Value = value;
-        Type = new ScalarType(PrimitiveType.Number);
+        ValueType = PrimitiveType.Number;
     }
 
     public Scalar(bool value)
     {
         Value = value;
-        Type = new ScalarType(PrimitiveType.Boolean);
+        ValueType = PrimitiveType.Boolean;
+    }
+
+    public Scalar(PrimitiveType type, object value)
+    {
+        Value = value;
+        ValueType = type;
     }
 
     public object Value { get; }
-    public IType Type { get; }
+
+    public IType Type => new ScalarType(ValueType);
+
+    public PrimitiveType ValueType { get; }
 }

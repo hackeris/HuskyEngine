@@ -9,7 +9,7 @@ public interface IPredefine
 
     public FunctionType? GetFunctionType(string symbol, List<IType> arguments);
 
-    public IType? GetIndexingType(IType indexable, IType index);
+    public IType? GetIndexingType(IType left, IType index);
 
     public IType? GetBinaryType(IType left, Operation.Binary op, IType right);
 

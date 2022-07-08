@@ -8,7 +8,6 @@ public static class Operation
         Sub,
         Mul,
         Div,
-
         Power,
 
         Equal,
@@ -16,7 +15,10 @@ public static class Operation
         Greater,
         Lower,
         GreaterOrEq,
-        LowerOrEq
+        LowerOrEq,
+        
+        And,
+        Or
     }
 
     public enum Unary
@@ -40,6 +42,8 @@ public static class Operation
             Binary.Lower => "<",
             Binary.GreaterOrEq => ">=",
             Binary.LowerOrEq => "<=",
+            Binary.And => "&",
+            Binary.Or => "|",
             _ => throw new ArgumentOutOfRangeException(nameof(op), op, null)
         };
     }

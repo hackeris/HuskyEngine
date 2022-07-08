@@ -10,7 +10,7 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
 {
     private readonly IPredefine _predefine;
 
-    public HuskyParser(IPredefine predefine)
+    private HuskyParser(IPredefine predefine)
     {
         _predefine = predefine;
     }
@@ -90,14 +90,36 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         var binaryOperator = operatorText switch
         {
             "^" => Operation.Binary.Power,
+            "+" => Operation.Binary.Add,
+            "-" => Operation.Binary.Sub,
+            "*" => Operation.Binary.Mul,
+            "/" => Operation.Binary.Div,
+            "=" => Operation.Binary.Equal,
+            "!=" => Operation.Binary.NotEqual,
+            ">" => Operation.Binary.Greater,
+            "<" => Operation.Binary.Lower,
+            ">=" => Operation.Binary.GreaterOrEq,
+            "<=" => Operation.Binary.LowerOrEq,
+            "&" => Operation.Binary.And,
+            "|" => Operation.Binary.Or,
             _ => throw new ParsingError()
         };
+
+        var funcType = _predefine.GetFunctionType(
+            operatorText,
+            new List<IType> { left.Type, right.Type }
+        );
+        if (funcType == null)
+        {
+            throw new ParsingError();
+        }
 
         return new BinaryExpression
         {
             Left = left,
             Operator = binaryOperator,
-            Right = right
+            Right = right,
+            Type = funcType.ReturnType
         };
     }
 
@@ -113,7 +135,7 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         var funcType = _predefine.GetFunctionType(functionName, argTypes);
         if (funcType == null)
         {
-            //  TODO: argument type mismatch error
+            throw new ParsingError();
         }
 
         return new FunctionCall
@@ -141,13 +163,12 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
 
     public override IExpression VisitArrayIndex(HuskyLangParser.ArrayIndexContext context)
     {
-        var indexable = Visit(context.indexable);
+        var left = Visit(context.indexable);
         var index = Visit(context.index);
-
 
         return new Indexing
         {
-            Indexable = indexable,
+            Indexable = left,
             Index = index
         };
     }
@@ -159,7 +180,7 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         var type = _predefine.GetType(name);
         if (type == null)
         {
-            //  TODO: could not find identifier
+            throw new ParsingError();
         }
 
         return new Identifier(name, type);

@@ -30,7 +30,7 @@ public class HuskyRuntime : IRuntime
 
     public IPredefine GetPredefine()
     {
-        throw new NotImplementedException();
+        return new Predefine(_source, _functions);
     }
 
     private IValue Eval(Literal literal)
@@ -63,15 +63,13 @@ public class HuskyRuntime : IRuntime
 
     private IValue CallIndex(Indexing indexing)
     {
-        var funcId = new IFunction.Id
-        {
-            Name = "[]",
-            ArgTypes =
+        var funcId = new IFunction.Id(
+            "[]", new()
             {
                 indexing.Indexable.Type,
                 indexing.Index.Type
             }
-        };
+        );
         var func = _functions[funcId];
         return func.Call(this, new List<IExpression>
         {
@@ -89,15 +87,13 @@ public class HuskyRuntime : IRuntime
 
     private IValue Eval(BinaryExpression expression)
     {
-        var funcId = new IFunction.Id
-        {
-            Name = Operation.NameOf(expression.Operator),
-            ArgTypes =
+        var funcId = new IFunction.Id(
+            Operation.NameOf(expression.Operator),
+            new()
             {
                 expression.Left.Type,
                 expression.Right.Type
-            }
-        };
+            });
         var func = _functions[funcId];
         return func.Call(this, new List<IExpression>
         {
@@ -108,11 +104,10 @@ public class HuskyRuntime : IRuntime
 
     private IValue Eval(UnaryExpression expression)
     {
-        var funcId = new IFunction.Id
-        {
-            Name = Operation.NameOf(expression.Operator),
-            ArgTypes = { expression.Operand.Type }
-        };
+        var funcId = new IFunction.Id(
+            Operation.NameOf(expression.Operator),
+            new() { expression.Operand.Type }
+        );
         var func = _functions[funcId];
         return func.Call(this, new List<IExpression> { expression.Operand });
     }
@@ -122,7 +117,7 @@ public class HuskyRuntime : IRuntime
         var code = identifier.Name;
         if (!_source.IsFormula(code))
         {
-            return new FloatVector { Values = _source.GetVector(code, offset) };
+            return new Vector(_source.GetVector(code, offset));
         }
 
         var formula = _source.GetFormula(code);
@@ -141,11 +136,7 @@ public class HuskyRuntime : IRuntime
 
     public void Register(string name, IFunction function)
     {
-        var key = new IFunction.Id
-        {
-            Name = name,
-            ArgTypes = function.ArgTypes
-        };
+        var key = new IFunction.Id(name, function.ArgTypes);
         _functions.Add(key, function);
     }
 

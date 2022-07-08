@@ -11,7 +11,7 @@ public class FunctionType : IType
     public List<IType> Arguments { get; }
     public IType ReturnType { get; }
 
-    protected bool Equals(FunctionType other)
+    private bool Equals(FunctionType other)
     {
         return Arguments.Equals(other.Arguments) && ReturnType.Equals(other.ReturnType);
     }
