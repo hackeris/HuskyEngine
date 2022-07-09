@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using HuskyEngine.Api.Dto;
+using HuskyEngine.Api.Dto.Request;
 using HuskyEngine.Engine;
 using HuskyEngine.Engine.Types;
 using HuskyEngine.Engine.Value;
@@ -20,8 +21,13 @@ public class ComputeController : ControllerBase
         _evaluator = evaluatorFactory;
     }
 
-    [HttpGet(Name = "compute")]
+    [HttpGet]
     public ComputeResult Compute(string formula, DateTime date)
+    {
+        return Compute(formula, date);
+    }
+
+    private ComputeResult Compute(string formula, DateTime date, bool boolAsNumber)
     {
         var evaluator = _evaluator.At(date);
 
@@ -43,10 +49,17 @@ public class ComputeController : ControllerBase
             _ => throw new Exception($"Unexpected value type {value.Type}")
         };
 
-        var rawValue = value.Type switch
+        var rawValue = value switch
         {
-            ScalarType => ((Scalar)value).Value,
-            VectorType => ((Vector)value).Values,
+            Scalar s => s.Value,
+            Vector v => (boolAsNumber, v.ElementType) switch
+            {
+                (true, PrimitiveType.Boolean) =>
+                    v.AsBoolean()
+                        .ToDictionary(p => p.Key,
+                            p => (object)(p.Value ? 1 : 0)),
+                _ => v.Values
+            },
             _ => throw new Exception($"Unexpected value type {value.Type}")
         };
 
@@ -57,5 +70,11 @@ public class ComputeController : ControllerBase
             Type = type,
             Value = rawValue
         };
+    }
+
+    [HttpPost]
+    public ComputeResult Compute(ComputeRequest request)
+    {
+        return Compute(request.Formula, request.Date, request.BoolAsNumber);
     }
 }

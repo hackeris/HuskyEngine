@@ -12,9 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<HuskyDbContext>(options =>
-{
-    options.UseMySQL(builder.Configuration.GetConnectionString("HuskyV2"));
-});
+    options.UseMySQL(builder.Configuration.GetConnectionString("HuskyV2")));
 builder.Services.AddScoped<DataSourceFactory>();
 builder.Services.AddScoped<EvaluatorFactory>();
 
@@ -26,8 +24,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

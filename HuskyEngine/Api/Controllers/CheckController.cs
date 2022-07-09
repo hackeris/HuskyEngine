@@ -18,7 +18,7 @@ public class CheckController : ControllerBase
         _evaluatorFactory = evaluatorFactory;
     }
 
-    [HttpGet(Name = "check")]
+    [HttpGet]
     public CheckResult Check(string formula)
     {
         var runtime = _evaluatorFactory.At(DateTime.Today);
@@ -51,4 +51,5 @@ public class CheckController : ControllerBase
             };
         }
     }
+
 }
