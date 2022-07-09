@@ -7,7 +7,7 @@ namespace HuskyEngine.Engine.Lib;
 
 public class Avail : IFunction
 {
-    public Avail(PrimitiveType elementType)
+    private Avail(PrimitiveType elementType)
     {
         Type = new VectorType(elementType);
         ArgTypes = new List<IType> { Type, new ScalarType(elementType) };

@@ -55,8 +55,6 @@ public class Rank : IFunction
     {
         var intVector = new VectorType(PrimitiveType.Integer);
         var numberVector = new VectorType(PrimitiveType.Number);
-        var intScalar = new ScalarType(PrimitiveType.Integer);
-        var numberScalar = new ScalarType(PrimitiveType.Number);
 
         var boolVector = new VectorType(PrimitiveType.Boolean);
 
