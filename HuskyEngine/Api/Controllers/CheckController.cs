@@ -6,12 +6,12 @@ namespace HuskyEngine.Api.Controllers;
 
 [ApiController]
 [Route("/api/check")]
-public class CheckApiController : ControllerBase
+public class CheckController : ControllerBase
 {
-    private readonly ILogger<CheckApiController> _logger;
+    private readonly ILogger<CheckController> _logger;
     private readonly DataSourceFactory _sourceFactoryFactory;
 
-    public CheckApiController(ILogger<CheckApiController> logger, DataSourceFactory sourceFactory)
+    public CheckController(ILogger<CheckController> logger, DataSourceFactory sourceFactory)
     {
         _logger = logger;
         _sourceFactoryFactory = sourceFactory;

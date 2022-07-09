@@ -1,6 +1,6 @@
 ﻿using HuskyEngine.Engine.Value;
 
-namespace HuskyEngine.Engine.Lib.Util;
+namespace HuskyEngine.Engine.Lib.Function.Util;
 
 public static class Mask
 {

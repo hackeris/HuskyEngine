@@ -1,4 +1,5 @@
 using HuskyEngine.Data;
+using HuskyEngine.Engine;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ builder.Services.AddDbContext<HuskyDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("HuskyV2"));
 });
 builder.Services.AddScoped<DataSourceFactory>();
+builder.Services.AddScoped<EvaluatorFactory>();
 
 var app = builder.Build();
 

@@ -1,7 +1,11 @@
-﻿namespace HuskyEngine.Api.Dto;
+﻿using System.Text.Json.Serialization;
+
+namespace HuskyEngine.Api.Dto;
 
 public class ComputeResult
 {
-    public bool Exist { get; set; }
-    public Dictionary<string, object> Values { get; set; }
+    [JsonPropertyName("date")] public string Date { get; set; }
+    [JsonPropertyName("formula")] public string Formula { get; set; }
+    [JsonPropertyName("type")] public string Type { get; set; }
+    [JsonPropertyName("value")] public object Value { get; set; }
 }

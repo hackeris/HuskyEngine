@@ -1,10 +1,10 @@
 ﻿using HuskyEngine.Engine.Context;
-using HuskyEngine.Engine.Lib.Util;
+using HuskyEngine.Engine.Lib.Function.Util;
 using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Types;
 using HuskyEngine.Engine.Value;
 
-namespace HuskyEngine.Engine.Lib;
+namespace HuskyEngine.Engine.Lib.Function;
 
 public class Sum : IFunction
 {
