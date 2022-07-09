@@ -84,7 +84,7 @@ public class FormulaEvaluateTest
 
         var value = (Vector)TestEval(formula);
 
-        Assert.AreEqual(4, value.AsInteger()["000001"]);
+        Assert.AreEqual(1, value.AsInteger()["000001"]);
     }
 
     [TestMethod]

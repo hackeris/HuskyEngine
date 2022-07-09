@@ -43,7 +43,7 @@ public class Rank : IFunction
     private static Vector RankValues<T>(Dictionary<string, T> values) where T : IComparable<T>
     {
         var sorted = values.ToList();
-        sorted.Sort((x, y) => x.Value.CompareTo(y.Value));
+        sorted.Sort((x, y) => -x.Value.CompareTo(y.Value));
 
         var ranks = sorted
             .Select((pair, i) => new KeyValuePair<string, int>(pair.Key, i + 1))
