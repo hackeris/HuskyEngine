@@ -2,6 +2,7 @@
 using HuskyEngine.Engine.Context;
 using HuskyEngine.Engine.Lib;
 using HuskyEngine.Engine.Parser;
+using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Value;
 
 namespace HuskyEngine.Engine;
@@ -34,6 +35,11 @@ public class EvaluatorFactory
         {
             var expr = HuskyParser.Parse(code, _runtime.GetPredefine());
             return _runtime.Eval(expr);
+        }
+
+        public IExpression Parse(string code)
+        {
+            return HuskyParser.Parse(code, _runtime.GetPredefine());
         }
 
         private readonly IRuntime _runtime;

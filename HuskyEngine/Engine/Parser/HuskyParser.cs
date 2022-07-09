@@ -290,10 +290,20 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         var lexer = new HuskyLangLexer(stream);
         var tokens = new CommonTokenStream(lexer);
         var parser = new HuskyLangParser(tokens);
-        var tree = parser.statement();
 
+        var errorListener = new ErrorListener();
+        parser.AddErrorListener(errorListener);
+        
+        var tree = parser.statement();
+        if (errorListener.HasError())
+        {
+            throw errorListener.Errors[0];
+        }
+        
         var visitor = new HuskyParser(pred);
-        return visitor.Visit(tree);
+        var expr = visitor.Visit(tree);
+
+        return expr;
     }
 
     public static IExpression Parse(string code, IRuntime runtime)

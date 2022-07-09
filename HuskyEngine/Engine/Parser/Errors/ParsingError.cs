@@ -22,6 +22,12 @@ public class ParsingError : Exception
         Column = column + 1;
     }
 
+    public ParsingError(int line, int position, string message) : base(message)
+    {
+        Line = line;
+        Column = position + 1;
+    }
+
     public override string ToString()
     {
         return $"{Line}:{Column} {Message}";
