@@ -22,7 +22,8 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         {
             "-" => Operation.Unary.Minus,
             "!" => Operation.Unary.Not,
-            _ => throw new ParsingError()
+            _ => throw new ParsingError(context,
+                $"Unsupported operator {opText}")
         };
 
         var operand = Visit(context.powr());
@@ -33,7 +34,8 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         );
         if (funcType == null)
         {
-            throw new ParsingError();
+            throw new ParsingError(context,
+                $"Unsupported operator {opText} on {operand.Type}");
         }
 
         return new UnaryExpression
@@ -48,7 +50,7 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
     {
         return VisitBinaryExpression(
             context.multOrDiv(),
-            context.op.Text,
+            context.op,
             context.powr()
         );
     }
@@ -57,7 +59,7 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
     {
         return VisitBinaryExpression(
             context.plusOrMinus(),
-            context.op.Text,
+            context.op,
             context.multOrDiv()
         );
     }
@@ -66,7 +68,7 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
     {
         return VisitBinaryExpression(
             context.compare(),
-            context.op.Text,
+            context.op,
             context.plusOrMinus()
         );
     }
@@ -75,7 +77,7 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
     {
         return VisitBinaryExpression(
             context.logical(),
-            context.op.Text,
+            context.op,
             context.compare()
         );
     }
@@ -84,21 +86,20 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
     {
         var leftContext = context.powr();
         var rightContext = context.atom();
-        var operatorText = context.op.Text;
 
-        return VisitBinaryExpression(leftContext, operatorText, rightContext);
+        return VisitBinaryExpression(leftContext, context.op, rightContext);
     }
 
     private IExpression VisitBinaryExpression(
         ParserRuleContext leftContext,
-        string operatorText,
+        IToken operatorToken,
         ParserRuleContext rightContext
     )
     {
         var left = Visit(leftContext);
         var right = Visit(rightContext);
 
-        var binaryOperator = operatorText switch
+        var binaryOperator = operatorToken.Text switch
         {
             "^" => Operation.Binary.Power,
             "+" => Operation.Binary.Add,
@@ -113,16 +114,18 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
             "<=" => Operation.Binary.LowerOrEq,
             "&" => Operation.Binary.And,
             "|" => Operation.Binary.Or,
-            _ => throw new ParsingError()
+            _ => throw new ParsingError(operatorToken,
+                $"Unsupported operator {operatorToken.Text}")
         };
 
         var funcType = _predefine.GetFunctionType(
-            operatorText,
+            operatorToken.Text,
             new List<IType> { left.Type, right.Type }
         );
         if (funcType == null)
         {
-            throw new ParsingError();
+            throw new ParsingError(operatorToken,
+                $"Unsupported binary operator {operatorToken.Text} on {left.Type} and {right.Type}");
         }
 
         return new BinaryExpression
@@ -146,7 +149,11 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         var funcType = _predefine.GetFunctionType(functionName, argTypes);
         if (funcType == null)
         {
-            throw new ParsingError();
+            var typesString = argTypes
+                .Select(e => e.ToString())
+                .Aggregate((a, b) => a + "," + b);
+            throw new ParsingError(context.functionName,
+                $"Could not find function {functionName}({typesString})");
         }
 
         return new FunctionCall
@@ -180,7 +187,8 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         var resultType = _predefine.GetIndexingType(left.Type, index.Type);
         if (resultType == null)
         {
-            throw new ParsingError();
+            throw new ParsingError(
+                context.index, $"Cannot indexing {index.Type} on {left.Type}");
         }
 
         return new Indexing
@@ -198,7 +206,8 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         var type = _predefine.GetType(name);
         if (type == null)
         {
-            throw new ParsingError();
+            throw new ParsingError(context,
+                $"Identifier {name} is not found");
         }
 
         return new Identifier(name, type);
@@ -286,5 +295,10 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
 
         var visitor = new HuskyParser(pred);
         return visitor.Visit(tree);
+    }
+
+    public static IExpression Parse(string code, IRuntime runtime)
+    {
+        return Parse(code, runtime.GetPredefine());
     }
 }

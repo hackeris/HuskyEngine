@@ -2,7 +2,7 @@
 
 public class ScalarType : IType
 {
-    protected bool Equals(ScalarType other)
+    private bool Equals(ScalarType other)
     {
         return Type == other.Type;
     }
@@ -26,4 +26,15 @@ public class ScalarType : IType
     }
 
     public PrimitiveType Type { get; }
+
+    public override string ToString()
+    {
+        return Type switch
+        {
+            PrimitiveType.Integer => "int",
+            PrimitiveType.Number => "number",
+            PrimitiveType.Boolean => "bool",
+            _ => "unknown"
+        };
+    }
 }

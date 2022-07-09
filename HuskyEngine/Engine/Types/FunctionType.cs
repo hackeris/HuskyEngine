@@ -8,7 +8,7 @@ public class FunctionType : IType
         ReturnType = returnType;
     }
 
-    public List<IType> Arguments { get; }
+    private List<IType> Arguments { get; }
     public IType ReturnType { get; }
 
     private bool Equals(FunctionType other)
@@ -27,5 +27,13 @@ public class FunctionType : IType
     public override int GetHashCode()
     {
         return HashCode.Combine(Arguments, ReturnType);
+    }
+
+    public override string ToString()
+    {
+        var args = Arguments
+            .Select(e => e.ToString())
+            .Aggregate((a, b) => $"{a},{b}");
+        return $"({args})->{ReturnType}";
     }
 }

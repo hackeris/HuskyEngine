@@ -6,7 +6,7 @@ public class TestDataSource : IDataSource
 {
     public bool Exist(string code)
     {
-        return true;
+        return code is not ("sum" or "avail");
     }
 
     public bool IsFormula(string code)

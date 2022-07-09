@@ -1,7 +1,4 @@
-﻿using HuskyEngine.Engine.Context;
-using HuskyEngine.Engine.Lib;
-using HuskyEngine.Engine.Lib.Operator;
-using HuskyEngine.Engine.Parser;
+﻿using HuskyEngine.Engine.Parser;
 using HuskyEngine.Engine.Value;
 using HuskyEngine.Tests.Lib;
 
@@ -102,19 +99,10 @@ public class FormulaEvaluateTest
 
     private static IValue TestEval(string formula)
     {
-        var dataSource = new TestDataSource();
-        var runtime = new HuskyRuntime(dataSource);
+        var runtime = TestRuntime.Get();
 
-        runtime.Register(BinaryFunction.GetDefines());
-        runtime.Register(UnaryFunction.GetDefines());
-        runtime.Register(Sum.GetDefines());
-        runtime.Register(Rank.GetDefines());
-        runtime.Register(Avail.GetDefines());
+        var expression = HuskyParser.Parse(formula, runtime);
 
-        var pred = runtime.GetPredefine();
-        var expression = HuskyParser.Parse(formula, pred);
-
-        var value = runtime.Eval(expression);
-        return value;
+        return runtime.Eval(expression);
     }
 }

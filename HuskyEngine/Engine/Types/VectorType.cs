@@ -2,7 +2,7 @@
 
 public class VectorType : IType
 {
-    protected bool Equals(VectorType other)
+    private bool Equals(VectorType other)
     {
         return ElementType == other.ElementType;
     }
@@ -26,4 +26,16 @@ public class VectorType : IType
     }
 
     public PrimitiveType ElementType { get; }
+
+    public override string ToString()
+    {
+        var eType = ElementType switch
+        {
+            PrimitiveType.Integer => "int",
+            PrimitiveType.Number => "number",
+            PrimitiveType.Boolean => "bool",
+            _ => "unknown"
+        };
+        return $"[{eType}]";
+    }
 }
