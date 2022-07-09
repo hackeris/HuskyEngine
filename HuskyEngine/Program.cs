@@ -1,4 +1,5 @@
 using HuskyEngine.Data;
+using HuskyEngine.Data.Cache;
 using HuskyEngine.Engine;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<DataCache>();
 builder.Services.AddDbContext<HuskyDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("HuskyV2")));
 builder.Services.AddScoped<DataSourceFactory>();

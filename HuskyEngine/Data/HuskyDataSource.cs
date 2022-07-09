@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using HuskyEngine.Data.Cache;
 using HuskyEngine.Data.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,48 +10,81 @@ public class HuskyDataSource : IDataSource
     private readonly HuskyDbContext _dbContext;
     private readonly List<DateTime> _dates;
     private readonly DateTime _date;
+    private readonly DataCache _cache;
+    private readonly ILogger<HuskyDataSource> _logger;
 
-    public HuskyDataSource(HuskyDbContext dbContext, List<DateTime> dates, DateTime date)
+    public HuskyDataSource(HuskyDbContext dbContext, DataCache cache, List<DateTime> dates, DateTime date)
     {
         _dbContext = dbContext;
         _dates = dates;
         _date = date;
+        _cache = cache;
+        _logger = LoggerFactory
+            .Create(b => b.AddConsole())
+            .CreateLogger<HuskyDataSource>();
     }
 
     public bool Exist(string code)
     {
-        if (code == "zero")
-        {
-            return true;
-        }
+        return _cache.GetOrLoad(
+            new CacheKey(nameof(Exist), code),
+            () =>
+            {
+                if (code == "zero")
+                {
+                    return true;
+                }
 
-        var factor = _dbContext.Factors
-            .Single(it => it.Code == code);
-        return factor != null;
+                var factor = _dbContext.Factors
+                    .Single(it => it.Code == code);
+                return factor != null;
+            });
     }
 
     public bool IsFormula(string code)
     {
-        if (code == "zero")
-        {
-            return false;
-        }
+        return _cache.GetOrLoad(
+            new CacheKey(nameof(IsFormula), code),
+            () =>
+            {
+                if (code == "zero")
+                {
+                    return false;
+                }
 
-        var factor = _dbContext.Factors
-            .Single(it => it.Code == code);
-        return factor is { SourceType: 2 };
+                var factor = _dbContext.Factors
+                    .Single(it => it.Code == code);
+                return factor is { SourceType: 2 };
+            });
     }
 
     public string GetFormula(string code)
     {
-        var factor = _dbContext.Factors
-            .Single(it => it.Code == code);
-        return factor.Formula;
+        return _cache.GetOrLoad(
+            new CacheKey(nameof(GetFormula), code),
+            () =>
+            {
+                var factor = _dbContext.Factors
+                    .Single(it => it.Code == code);
+                return factor.Formula;
+            });
     }
 
     public Dictionary<string, float> GetVector(string code, int offset)
     {
         Debug.Assert(offset <= 0);
+
+        return _cache.GetOrLoad(
+            new CacheKey(nameof(GetVector), code, _date, offset),
+            () => LoadVector(code, offset)
+        );
+    }
+
+    private Dictionary<string, float> LoadVector(string code, int offset)
+    {
+        _logger.LogInformation(
+            "Load values of {Code} at {Date} {Offset}",
+            code, _date, offset);
 
         if (code == "zero")
         {
