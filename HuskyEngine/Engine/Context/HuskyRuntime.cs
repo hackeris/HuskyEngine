@@ -91,7 +91,7 @@ public class HuskyRuntime : IRuntime
     {
         var funcId = new IFunction.Id(
             Operation.NameOf(expression.Operator),
-            new()
+            new List<IType>
             {
                 expression.Left.Type,
                 expression.Right.Type
@@ -108,7 +108,7 @@ public class HuskyRuntime : IRuntime
     {
         var funcId = new IFunction.Id(
             Operation.NameOf(expression.Operator),
-            new() { expression.Operand.Type }
+            new List<IType> { expression.Operand.Type }
         );
         var func = _functions[funcId];
         return func.Call(this, new List<IExpression> { expression.Operand });
@@ -135,16 +135,16 @@ public class HuskyRuntime : IRuntime
             : new HuskyRuntime(new OffsetProxySource(_source, offset), _functions);
     }
 
-    public void Register(IFunction.Def define)
+    public void Register(List<IFunction.Def> defines)
+    {
+        defines.ForEach(Register);
+    }
+
+    private void Register(IFunction.Def define)
     {
         var (name, function) = (define.Name, define.Function);
         var key = new IFunction.Id(name, function.ArgTypes);
         _functions.Add(key, function);
-    }
-
-    public void Register(List<IFunction.Def> defines)
-    {
-        defines.ForEach(Register);
     }
 
     private readonly IDataSource _source;

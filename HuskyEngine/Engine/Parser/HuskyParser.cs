@@ -156,12 +156,11 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
                 $"Could not find function {functionName}({typesString})");
         }
 
-        return new FunctionCall
-        {
-            Name = functionName,
-            Arguments = arguments,
-            Type = funcType.ReturnType
-        };
+        return new FunctionCall(
+            functionName,
+            arguments,
+            funcType.ReturnType
+        );
     }
 
     private List<IExpression> UnfoldArgList(HuskyLangParser.ArgListContext? context)

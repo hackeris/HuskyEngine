@@ -5,9 +5,16 @@ namespace HuskyEngine.Engine.Semantic;
 
 public class FunctionCall : IExpression
 {
-    public string Name { get; set; }
-    public List<IExpression> Arguments { get; set; }
-    public IType Type { get; set; }
+    public FunctionCall(string name, List<IExpression> arguments, IType type)
+    {
+        Name = name;
+        Arguments = arguments;
+        Type = type;
+    }
+
+    private string Name { get; }
+    public List<IExpression> Arguments { get; }
+    public IType Type { get; }
 
     public IFunction.Id GetId()
     {
