@@ -17,7 +17,8 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
 
     public override IExpression VisitUnaryOp(HuskyLangParser.UnaryOpContext context)
     {
-        var unaryOperator = context.op.Text switch
+        var opText = context.op.Text;
+        var unaryOperator = opText switch
         {
             "-" => Operation.Unary.Minus,
             "!" => Operation.Unary.Not,
@@ -26,10 +27,20 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
 
         var operand = Visit(context.powr());
 
+        var funcType = _predefine.GetFunctionType(
+            opText,
+            new List<IType> { operand.Type }
+        );
+        if (funcType == null)
+        {
+            throw new ParsingError();
+        }
+
         return new UnaryExpression
         {
             Operand = operand,
-            Operator = unaryOperator
+            Operator = unaryOperator,
+            Type = funcType.ReturnType
         };
     }
 
@@ -166,16 +177,23 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
         var left = Visit(context.indexable);
         var index = Visit(context.index);
 
+        var resultType = _predefine.GetIndexingType(left.Type, index.Type);
+        if (resultType == null)
+        {
+            throw new ParsingError();
+        }
+
         return new Indexing
         {
+            Index = index,
             Indexable = left,
-            Index = index
+            Type = resultType
         };
     }
 
-    public override IExpression VisitToIdentifier(HuskyLangParser.ToIdentifierContext context)
+    public override IExpression VisitIdentifier(HuskyLangParser.IdentifierContext context)
     {
-        var name = context.identifier().ID().GetText();
+        var name = context.ID().GetText();
 
         var type = _predefine.GetType(name);
         if (type == null)
@@ -246,6 +264,11 @@ public class HuskyParser : HuskyLangBaseVisitor<IExpression>
     public override IExpression VisitToAtom(HuskyLangParser.ToAtomContext context)
     {
         return Visit(context.atom());
+    }
+
+    public override IExpression VisitToIdentifier(HuskyLangParser.ToIdentifierContext context)
+    {
+        return Visit(context.identifier());
     }
 
     public override IExpression VisitBraces(HuskyLangParser.BracesContext context)

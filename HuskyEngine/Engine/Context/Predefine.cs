@@ -1,4 +1,4 @@
-﻿using HuskyEngine.Data.Source;
+﻿using HuskyEngine.Data;
 using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Types;
 
@@ -7,7 +7,7 @@ namespace HuskyEngine.Engine.Context;
 public class Predefine : IPredefine
 {
     public Predefine(
-        DataSource dataSource,
+        IDataSource dataSource,
         Dictionary<IFunction.Id, IFunction> functions
     )
     {
@@ -50,6 +50,6 @@ public class Predefine : IPredefine
         return GetFunctionType(Operation.NameOf(op), new List<IType> { operand });
     }
 
-    private readonly DataSource _dataDataSource;
+    private readonly IDataSource _dataDataSource;
     private readonly Dictionary<IFunction.Id, IFunction> _functions;
 }

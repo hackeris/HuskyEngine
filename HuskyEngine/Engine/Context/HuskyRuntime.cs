@@ -1,4 +1,4 @@
-using HuskyEngine.Data.Source;
+using HuskyEngine.Data;
 using HuskyEngine.Engine.Parser;
 using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Engine.Types;
@@ -8,10 +8,16 @@ namespace HuskyEngine.Engine.Context;
 
 public class HuskyRuntime : IRuntime
 {
-    public HuskyRuntime(DataSource source)
+    public HuskyRuntime(IDataSource source)
     {
         _source = source;
         _functions = new Dictionary<IFunction.Id, IFunction>();
+    }
+
+    private HuskyRuntime(IDataSource source, Dictionary<IFunction.Id, IFunction> functions)
+    {
+        _source = source;
+        _functions = functions;
     }
 
     public IValue Eval(IExpression expression)
@@ -50,13 +56,9 @@ public class HuskyRuntime : IRuntime
         return indexing switch
         {
             {
-                Indexable: var exp,
-                Index: Literal
-                {
-                    Value: int index,
-                    Type: ScalarType { Type: PrimitiveType.Integer }
-                }
-            } => ProxyOffset(exp, index),
+                Indexable: Identifier id,
+                Index.Type: ScalarType { Type: PrimitiveType.Integer }
+            } => Eval(id, ((Scalar)Eval(indexing.Index)).AsInteger()),
             _ => CallIndex(indexing)
         };
     }
@@ -123,23 +125,28 @@ public class HuskyRuntime : IRuntime
         var formula = _source.GetFormula(code);
         var expression = HuskyParser.Parse(formula, GetPredefine());
 
-        return ProxyOffset(expression, offset);
+        return Shift(offset).Eval(expression);
     }
 
-    private IValue ProxyOffset(IExpression expression, int offset)
+    private HuskyRuntime Shift(int offset)
     {
-        IRuntime runtime = offset != 0
-            ? new OffsetProxy(this, offset)
-            : this;
-        return runtime.Eval(expression);
+        return offset == 0
+            ? this
+            : new HuskyRuntime(new OffsetProxySource(_source, offset), _functions);
     }
 
-    public void Register(string name, IFunction function)
+    public void Register(IFunction.Def define)
     {
+        var (name, function) = (define.Name, define.Function);
         var key = new IFunction.Id(name, function.ArgTypes);
         _functions.Add(key, function);
     }
 
-    private readonly DataSource _source;
+    public void Register(List<IFunction.Def> defines)
+    {
+        defines.ForEach(Register);
+    }
+
+    private readonly IDataSource _source;
     private readonly Dictionary<IFunction.Id, IFunction> _functions;
 }

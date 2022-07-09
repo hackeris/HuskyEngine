@@ -1,12 +1,9 @@
-namespace HuskyEngine.Data.Source;
+using HuskyEngine.Data;
 
-public class DataSource
+namespace HuskyEngine.Tests.Lib;
+
+public class TestDataSource : IDataSource
 {
-    public DataSource(DateTime baseDate)
-    {
-        _baseDate = baseDate;
-    }
-
     public bool Exist(string code)
     {
         return true;
@@ -33,12 +30,10 @@ public class DataSource
     {
         return new Dictionary<string, float>
         {
-            { "000001", 1.0f },
-            { "000002", 2.0f },
-            { "600000", 3.0f },
-            { "600001", 4.0f }
+            { "000001", 1.0f + offset },
+            { "000002", 2.0f + offset },
+            { "600000", 3.0f + offset },
+            { "600001", 4.0f + offset }
         };
     }
-
-    private readonly DateTime _baseDate;
 }

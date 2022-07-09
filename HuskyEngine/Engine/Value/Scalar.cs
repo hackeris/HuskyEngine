@@ -33,4 +33,14 @@ public class Scalar : IValue
     public IType Type => new ScalarType(ValueType);
 
     public PrimitiveType ValueType { get; }
+
+    public int AsInteger()
+    {
+        return (int)Value;
+    }
+
+    public float AsNumber()
+    {
+        return (float)Value;
+    }
 }

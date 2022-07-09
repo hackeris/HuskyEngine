@@ -39,6 +39,24 @@ public class Vector : IValue
         Values = keys.ToDictionary(key => key, _ => value.Value);
     }
 
+    public Dictionary<string, bool> AsBoolean()
+    {
+        return Values.ToDictionary(p => p.Key,
+            p => (bool)p.Value);
+    }
+
+    public Dictionary<string, int> AsInteger()
+    {
+        return Values.ToDictionary(p => p.Key,
+            p => (int)p.Value);
+    }
+
+    public Dictionary<string, float> AsNumber()
+    {
+        return Values.ToDictionary(p => p.Key,
+            p => (float)p.Value);
+    }
+
     public PrimitiveType ElementType { get; }
 
     public IType Type => new VectorType(ElementType);
