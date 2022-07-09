@@ -28,6 +28,19 @@ public class TestDataSource : IDataSource
 
     public Dictionary<string, float> GetVector(string code, int offset)
     {
+        if (code == "zero")
+        {
+            return new Dictionary<string, float>
+            {
+                { "000001", 0.0f },
+                { "000002", 0.0f },
+                { "600000", 0.0f },
+                { "600001", 0.0f },
+                { "688001", 0.0f },
+                { "688002", 0.0f },
+            };
+        }
+
         return new Dictionary<string, float>
         {
             { "000001", 1.0f + offset },

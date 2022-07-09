@@ -62,10 +62,10 @@ public class Rank : IFunction
 
         var functions = new List<Rank>
         {
-            new(new List<IType> { intVector }, intScalar),
-            new(new List<IType> { numberVector }, numberScalar),
-            new(new List<IType> { intVector, boolVector }, intScalar),
-            new(new List<IType> { numberVector, boolVector }, numberScalar),
+            new(new List<IType> { intVector }, intVector),
+            new(new List<IType> { numberVector }, intVector),
+            new(new List<IType> { intVector, boolVector }, intVector),
+            new(new List<IType> { numberVector, boolVector }, intVector),
         };
 
         return functions

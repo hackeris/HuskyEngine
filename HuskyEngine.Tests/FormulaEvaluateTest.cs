@@ -90,6 +90,16 @@ public class FormulaEvaluateTest
         Assert.AreEqual(4, value.AsInteger()["000001"]);
     }
 
+    [TestMethod]
+    public void TestAvailFunction()
+    {
+        const string formula = "avail(rank(-price), 1000)";
+
+        var value = (Vector)TestEval(formula);
+
+        Assert.AreEqual(1000, value.Values["688001"]);
+    }
+
     private static IValue TestEval(string formula)
     {
         var dataSource = new TestDataSource();
@@ -99,6 +109,7 @@ public class FormulaEvaluateTest
         runtime.Register(UnaryFunction.GetDefines());
         runtime.Register(Sum.GetDefines());
         runtime.Register(Rank.GetDefines());
+        runtime.Register(Avail.GetDefines());
 
         var pred = runtime.GetPredefine();
         var expression = HuskyParser.Parse(formula, pred);
