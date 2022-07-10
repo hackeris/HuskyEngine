@@ -9,16 +9,18 @@ namespace HuskyEngine.Engine;
 
 public class EvaluatorFactory
 {
+    private readonly List<IFunction.Def> _funcDefines;
     public EvaluatorFactory(DataSourceFactory source)
     {
         _source = source;
+        _funcDefines = Definition.GetDefines();
     }
 
     public Evaluator At(DateTime date)
     {
         var dataSource = _source.At(date);
         var runtime = new HuskyRuntime(dataSource);
-        runtime.Register(Definition.GetDefines());
+        runtime.Register(_funcDefines);
         return new Evaluator(runtime);
     }
 
