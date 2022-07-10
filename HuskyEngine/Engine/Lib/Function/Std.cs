@@ -51,7 +51,7 @@ public class Std : IFunction
         var squareVar = values.Values
             .Select(a => a - avg)
             .Select(a => a * a)
-            .Aggregate(0.0f, (a, b) => a + b) / (values.Count - 1);
+            .Aggregate(0.0f, (a, b) => a + b) / values.Count;
         return (float)Math.Sqrt(squareVar);
     }
 

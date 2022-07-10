@@ -19,6 +19,9 @@ public static class Definition
             Std.GetDefines(),
             ZScore.GetDefines(),
             Cap.GetDefines(),
+            SumT.GetDefines(),
+            AvgT.GetDefines(),
+            StdT.GetDefines()
         }.Aggregate((a, b) => a.Union(b).ToList());
     }
 }

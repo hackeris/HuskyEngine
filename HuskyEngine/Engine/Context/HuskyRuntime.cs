@@ -56,9 +56,9 @@ public class HuskyRuntime : IRuntime
         return indexing switch
         {
             {
-                Indexable: Identifier id,
+                Indexable: var expr,
                 Index.Type: ScalarType { Type: PrimitiveType.Integer }
-            } => Eval(id, ((Scalar)Eval(indexing.Index)).AsInteger()),
+            } => Eval(expr, ((Scalar)Eval(indexing.Index)).AsInteger()),
             _ => CallIndex(indexing)
         };
     }
@@ -114,18 +114,22 @@ public class HuskyRuntime : IRuntime
         return func.Call(this, new List<IExpression> { expression.Operand });
     }
 
-    private IValue Eval(Identifier identifier, int offset)
+    private IValue Eval(IExpression expr, int offset)
     {
-        var code = identifier.Name;
-        if (!_source.IsFormula(code))
+        if (expr is Identifier identifier)
         {
-            return new Vector(_source.GetVector(code, offset));
+            var code = identifier.Name;
+            if (!_source.IsFormula(code))
+            {
+                return new Vector(_source.GetVector(code, offset));
+            }
+
+            var formula = _source.GetFormula(code);
+            var expression = HuskyParser.Parse(formula, GetPredefine());
+            return Shift(offset).Eval(expression);
         }
 
-        var formula = _source.GetFormula(code);
-        var expression = HuskyParser.Parse(formula, GetPredefine());
-
-        return Shift(offset).Eval(expression);
+        return Shift(offset).Eval(expr);
     }
 
     private HuskyRuntime Shift(int offset)

@@ -10,18 +10,18 @@ public class BinaryFunction : IFunction
     private BinaryFunction(Operation.Binary op, IType left, IType right)
     {
         _op = op;
-        Type = RouteType(left, right);
+        Type = RouteType(left, op, right);
         ArgTypes = new List<IType> { left, right };
     }
 
-    private IType RouteType(IType left, IType right)
+    private IType RouteType(IType left, Operation.Binary op, IType right)
     {
         return (left, right) switch
         {
-            (VectorType l, VectorType r) => VectorOnly(l, r),
-            (ScalarType l, VectorType r) => ScalarVector(l, r),
-            (VectorType l, ScalarType r) => VectorScalar(l, r),
-            (ScalarType l, ScalarType r) => ScalarOnly(l, r),
+            (VectorType l, VectorType r) => VectorOnly(l, op, r),
+            (ScalarType l, VectorType r) => ScalarVector(l, op, r),
+            (VectorType l, ScalarType r) => VectorScalar(l, op, r),
+            (ScalarType l, ScalarType r) => ScalarOnly(l, op, r),
             _ => throw new Exception("unsupported")
         };
     }
@@ -31,72 +31,78 @@ public class BinaryFunction : IFunction
         var left = runtime.Eval(arguments[0]);
         var right = runtime.Eval(arguments[1]);
 
+        return Apply(left, _op, right);
+    }
+
+    public static IValue Apply(IValue left, Operation.Binary op, IValue right)
+    {
         return (left, right) switch
         {
-            (Vector l, Vector r) => VectorOnly(l, r),
-            (Vector l, Scalar r) => VectorScalar(l, r),
-            (Scalar l, Vector r) => ScalarVector(l, r),
-            (Scalar l, Scalar r) => ScalarOnly(l, r),
+            (Vector l, Vector r) => VectorOnly(l, op, r),
+            (Vector l, Scalar r) => VectorScalar(l, op, r),
+            (Scalar l, Vector r) => ScalarVector(l, op, r),
+            (Scalar l, Scalar r) => ScalarOnly(l, op, r),
             _ => throw new Exception("unsupported")
         };
     }
 
-    private IValue VectorOnly(Vector left, Vector right)
+    private static IValue VectorOnly(Vector left, Operation.Binary op, Vector right)
     {
         var leftValues = left.Values;
         var rightValues = right.Values;
 
         var keys = leftValues.Keys.Union(rightValues.Keys);
 
-        var op = SelectFunction(left.ElementType, right.ElementType);
+        var func = SelectFunction(left.ElementType, op, right.ElementType);
         var values = keys
             .Where(key =>
                 leftValues.ContainsKey(key))
             .Where(key =>
                 rightValues.ContainsKey(key))
             .ToDictionary(key => key, key =>
-                op(leftValues[key], rightValues[key]))
+                func(leftValues[key], rightValues[key]))
             .Where(pair => pair.Value != null)
             .ToDictionary(pair => pair.Key, pair => pair.Value!);
 
-        return new Vector(PrimitiveOnly(left.ElementType, right.ElementType), values);
+        return new Vector(PrimitiveOnly(left.ElementType, op, right.ElementType), values);
     }
 
-    private IValue VectorScalar(Vector left, Scalar right)
+    private static IValue VectorScalar(Vector left, Operation.Binary op, Scalar right)
     {
-        return VectorOnly(left, new Vector(left.Values.Keys, right));
+        return VectorOnly(left, op, new Vector(left.Values.Keys, right));
     }
 
-    private IValue ScalarVector(Scalar left, Vector right)
+    private static IValue ScalarVector(Scalar left, Operation.Binary op, Vector right)
     {
-        return VectorOnly(new Vector(right.Values.Keys, left), right);
+        return VectorOnly(new Vector(right.Values.Keys, left), op, right);
     }
 
-    private Scalar ScalarOnly(Scalar left, Scalar right)
+    private static Scalar ScalarOnly(Scalar left, Operation.Binary op, Scalar right)
     {
-        var op = SelectFunction(left.ValueType, right.ValueType);
+        var func = SelectFunction(left.ValueType, op, right.ValueType);
         return new Scalar(
-            PrimitiveOnly(left.ValueType, right.ValueType),
-            op(left.Value, right.Value)!
+            PrimitiveOnly(left.ValueType, op, right.ValueType),
+            func(left.Value, right.Value)!
         );
     }
 
-    private Func<object, object, object?> SelectFunction(PrimitiveType left, PrimitiveType right)
+    private static Func<object, object, object?> SelectFunction(PrimitiveType left, Operation.Binary op,
+        PrimitiveType right)
     {
         return (left, right) switch
         {
-            (PrimitiveType.Integer, PrimitiveType.Integer) => IntegerOps(),
-            (PrimitiveType.Number, PrimitiveType.Number) => NumberOps(),
-            (PrimitiveType.Integer, PrimitiveType.Number) => IntegerNumberOps(),
-            (PrimitiveType.Number, PrimitiveType.Integer) => NumberIntegerOps(),
-            (PrimitiveType.Boolean, PrimitiveType.Boolean) => BooleanOps(),
+            (PrimitiveType.Integer, PrimitiveType.Integer) => IntegerOps(op),
+            (PrimitiveType.Number, PrimitiveType.Number) => NumberOps(op),
+            (PrimitiveType.Integer, PrimitiveType.Number) => IntegerNumberOps(op),
+            (PrimitiveType.Number, PrimitiveType.Integer) => NumberIntegerOps(op),
+            (PrimitiveType.Boolean, PrimitiveType.Boolean) => BooleanOps(op),
             _ => throw new Exception("unsupported")
         };
     }
 
-    private Func<object, object, object?> BooleanOps()
+    private static Func<object, object, object?> BooleanOps(Operation.Binary op)
     {
-        return _op switch
+        return op switch
         {
             Operation.Binary.And =>
                 (a, b) => (bool)a && (bool)b,
@@ -106,9 +112,9 @@ public class BinaryFunction : IFunction
         };
     }
 
-    private Func<object, object, object?> IntegerOps()
+    private static Func<object, object, object?> IntegerOps(Operation.Binary op)
     {
-        return _op switch
+        return op switch
         {
             Operation.Binary.Add =>
                 (a, b) => (int)a + (int)b,
@@ -136,9 +142,9 @@ public class BinaryFunction : IFunction
         };
     }
 
-    private Func<object, object, object?> NumberOps()
+    private static Func<object, object, object?> NumberOps(Operation.Binary op)
     {
-        return _op switch
+        return op switch
         {
             Operation.Binary.Add =>
                 (a, b) => (float)a + (float)b,
@@ -166,9 +172,9 @@ public class BinaryFunction : IFunction
         };
     }
 
-    private Func<object, object, object?> NumberIntegerOps()
+    private static Func<object, object, object?> NumberIntegerOps(Operation.Binary op)
     {
-        return _op switch
+        return op switch
         {
             Operation.Binary.Add =>
                 (a, b) => (float)a + (int)b,
@@ -196,9 +202,9 @@ public class BinaryFunction : IFunction
         };
     }
 
-    private Func<object, object, object?> IntegerNumberOps()
+    private static Func<object, object, object?> IntegerNumberOps(Operation.Binary op)
     {
-        return _op switch
+        return op switch
         {
             Operation.Binary.Add =>
                 (a, b) => (int)a + (float)b,
@@ -226,31 +232,31 @@ public class BinaryFunction : IFunction
         };
     }
 
-    private IType VectorOnly(VectorType left, VectorType right)
+    private static IType VectorOnly(VectorType left, Operation.Binary op, VectorType right)
     {
-        return new VectorType(PrimitiveOnly(left.ElementType, right.ElementType));
+        return new VectorType(PrimitiveOnly(left.ElementType, op, right.ElementType));
     }
 
-    private IType VectorScalar(VectorType left, ScalarType right)
+    private static IType VectorScalar(VectorType left, Operation.Binary op, ScalarType right)
     {
-        return new VectorType(PrimitiveOnly(left.ElementType, right.Type));
+        return new VectorType(PrimitiveOnly(left.ElementType, op, right.Type));
     }
 
-    private IType ScalarVector(ScalarType left, VectorType right)
+    private static IType ScalarVector(ScalarType left, Operation.Binary op, VectorType right)
     {
-        return new VectorType(PrimitiveOnly(left.Type, right.ElementType));
+        return new VectorType(PrimitiveOnly(left.Type, op, right.ElementType));
     }
 
-    private IType ScalarOnly(ScalarType left, ScalarType right)
+    private static IType ScalarOnly(ScalarType left, Operation.Binary op, ScalarType right)
     {
-        return new ScalarType(PrimitiveOnly(left.Type, right.Type));
+        return new ScalarType(PrimitiveOnly(left.Type, op, right.Type));
     }
 
-    private PrimitiveType PrimitiveOnly(PrimitiveType left, PrimitiveType right)
+    private static PrimitiveType PrimitiveOnly(PrimitiveType left, Operation.Binary op, PrimitiveType right)
     {
         return (left, right) switch
         {
-            (PrimitiveType.Integer, PrimitiveType.Integer) => _op switch
+            (PrimitiveType.Integer, PrimitiveType.Integer) => op switch
             {
                 Operation.Binary.Add
                     or Operation.Binary.Sub
@@ -270,7 +276,7 @@ public class BinaryFunction : IFunction
             (PrimitiveType.Number, PrimitiveType.Integer)
                 or (PrimitiveType.Integer, PrimitiveType.Number)
                 or (PrimitiveType.Number, PrimitiveType.Number)
-                => _op switch
+                => op switch
                 {
                     Operation.Binary.Add
                         or Operation.Binary.Sub
@@ -287,7 +293,7 @@ public class BinaryFunction : IFunction
                         => PrimitiveType.Boolean,
                     _ => throw new Exception("unsupported")
                 },
-            (PrimitiveType.Boolean, PrimitiveType.Boolean) => _op switch
+            (PrimitiveType.Boolean, PrimitiveType.Boolean) => op switch
             {
                 Operation.Binary.And or Operation.Binary.Or => PrimitiveType.Boolean,
                 _ => throw new Exception("unsupported")
@@ -346,7 +352,7 @@ public class BinaryFunction : IFunction
                 Name = Operation.NameOf(op),
                 Function = new BinaryFunction(op, left, right)
             };
-        
+
         var logicalDefines =
             from op in logicalOperators
             from left in logicalTypes
