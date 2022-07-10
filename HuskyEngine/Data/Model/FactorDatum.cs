@@ -2,7 +2,7 @@
 
 namespace HuskyEngine.Data.Model
 {
-    public class FactorDatum
+    public class FactorDatum : IFactorDatum
     {
         public long Id { get; set; }
         public DateTime Date { get; set; }

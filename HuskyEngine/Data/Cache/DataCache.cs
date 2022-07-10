@@ -4,11 +4,23 @@ namespace HuskyEngine.Data.Cache;
 
 public class DataCache
 {
+    private readonly int _sizeLimit;
     private readonly MemoryCache _cache;
 
     public DataCache()
     {
-        _cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 20000 });
+        _sizeLimit = 20000;
+        _cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = _sizeLimit });
+    }
+
+    public int Used()
+    {
+        return _cache.Count;
+    }
+
+    public int MaxSize()
+    {
+        return _sizeLimit;
     }
 
     public T GetOrLoad<T>(

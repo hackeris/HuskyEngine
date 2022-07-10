@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using HuskyEngine.Data.Cache;
 using HuskyEngine.Data.Model;
@@ -75,13 +76,29 @@ public class HuskyDataSource : IDataSource
     {
         Debug.Assert(offset <= 0);
 
-        return _cache.GetOrLoad(
+        var values = _cache.GetOrLoad(
             new CacheKey(nameof(GetVector), code, _date, offset),
             () => LoadVector(code, offset)
         );
+
+        return values.ToDictionary(
+            it => new string(it.Symbol),
+            it => it.Value
+        );
     }
 
-    private Dictionary<string, float> LoadVector(string code, int offset)
+    private FactorCacheItem[] LoadVector(string code, int offset)
+    {
+        return LoadFactorDatum(code, offset)
+            .Select(it => new FactorCacheItem
+            {
+                Symbol = it.Symbol,
+                Value = (float)it.Value!
+            })
+            .ToArray();
+    }
+
+    private IEnumerable<IFactorDatum> LoadFactorDatum(string code, int offset)
     {
         _logger.LogInformation(
             "Load values of {Code} at {Date} {Offset}",
@@ -90,7 +107,7 @@ public class HuskyDataSource : IDataSource
         if (code == "zero")
         {
             return GetSymbols()
-                .ToDictionary(s => s, _ => 0.0f);
+                .Select(s => new FactorDatum { Symbol = s, Value = 0.0f });
         }
 
         var factor = _dbContext.Factors
@@ -107,8 +124,7 @@ public class HuskyDataSource : IDataSource
                 .Where(dt =>
                     dt.Id == factorId
                     && dt.Date == exactDate
-                    && dt.Value != null)
-                .ToDictionary(dt => dt.Symbol, dt => (float)dt.Value!);
+                    && dt.Value != null);
         }
 
         if (factor.SourceType == 1)
@@ -120,8 +136,7 @@ public class HuskyDataSource : IDataSource
                 .Chunk(100)
                 .Select(chunk => SelectFinancialDatum(factorId, chunk, referenceDate, queryOffset))
                 .Aggregate((a, b) => a.Union(b).ToList())
-                .Where(p => p.Value != null)
-                .ToDictionary(p => p.Symbol, p => (float)p.Value!);
+                .Where(p => p.Value != null);
         }
 
         throw new Exception("Unsupported");
@@ -166,7 +181,7 @@ public class HuskyDataSource : IDataSource
         }
 
         var sql = builder.ToString();
-        
+
         return _dbContext.FinancialFactorData
             .FromSqlRaw(sql)
             .ToList();

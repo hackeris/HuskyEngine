@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace HuskyEngine.Api.Dto.Response;
+namespace HuskyEngine.Api.Dto.Response.Check;
 
 public class CheckResultDto
 {
