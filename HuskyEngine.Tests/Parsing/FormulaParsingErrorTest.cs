@@ -3,7 +3,7 @@ using HuskyEngine.Engine.Parser.Errors;
 using HuskyEngine.Engine.Semantic;
 using HuskyEngine.Tests.Lib;
 
-namespace HuskyEngine.Tests;
+namespace HuskyEngine.Tests.Parsing;
 
 [TestClass]
 public class FormulaParsingErrorTest

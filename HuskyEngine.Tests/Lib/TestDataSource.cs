@@ -38,6 +38,7 @@ public class TestDataSource : IDataSource
                 { "600001", 0.0f },
                 { "688001", 0.0f },
                 { "688002", 0.0f },
+                { "688003", 0.0f },
             };
         }
 
@@ -46,7 +47,8 @@ public class TestDataSource : IDataSource
             { "000001", 1.0f + offset },
             { "000002", 2.0f + offset },
             { "600000", 3.0f + offset },
-            { "600001", 4.0f + offset }
+            { "600001", 4.0f + offset },
+            { "600002", 5.0f + offset }
         };
     }
 }

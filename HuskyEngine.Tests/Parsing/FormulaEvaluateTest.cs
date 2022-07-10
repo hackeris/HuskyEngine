@@ -1,8 +1,7 @@
-﻿using HuskyEngine.Engine.Parser;
-using HuskyEngine.Engine.Value;
+﻿using HuskyEngine.Engine.Value;
 using HuskyEngine.Tests.Lib;
 
-namespace HuskyEngine.Tests;
+namespace HuskyEngine.Tests.Parsing;
 
 [TestClass]
 public class FormulaEvaluateTest
@@ -12,7 +11,7 @@ public class FormulaEvaluateTest
     {
         const string formula = "earning / price";
 
-        var value = (Vector)TestEval(formula);
+        var value = (Vector)TestRuntime.Eval(formula);
 
         Assert.IsTrue(value.AsNumber().All(p => Math.Abs(p.Value - 1.0) < 0.00001f));
     }
@@ -22,7 +21,7 @@ public class FormulaEvaluateTest
     {
         const string formula = "!(- earning / price > 0)";
 
-        var value = (Vector)TestEval(formula);
+        var value = (Vector)TestRuntime.Eval(formula);
 
         Assert.IsTrue(value.AsBoolean().All(p => p.Value));
     }
@@ -32,7 +31,7 @@ public class FormulaEvaluateTest
     {
         const string formula = "earning < 0 | price > 0";
 
-        var value = (Vector)TestEval(formula);
+        var value = (Vector)TestRuntime.Eval(formula);
 
         Assert.IsTrue(value.AsBoolean().All(p => p.Value));
     }
@@ -42,7 +41,7 @@ public class FormulaEvaluateTest
     {
         const string formula = "pe + pe = 2";
 
-        var value = (Vector)TestEval(formula);
+        var value = (Vector)TestRuntime.Eval(formula);
 
         Assert.IsTrue(value.AsBoolean().All(p => p.Value));
     }
@@ -52,7 +51,7 @@ public class FormulaEvaluateTest
     {
         const string formula = "pe[-2] + pe[-1]";
 
-        var value = (Vector)TestEval(formula);
+        var value = (Vector)TestRuntime.Eval(formula);
 
         Assert.IsTrue(value.AsNumber().All(p => Math.Abs(p.Value - 2.0) < 0.0001f));
     }
@@ -62,9 +61,9 @@ public class FormulaEvaluateTest
     {
         const string formula = "sum(pe, price > 2)";
 
-        var value = (Scalar)TestEval(formula);
+        var value = (Scalar)TestRuntime.Eval(formula);
 
-        Assert.IsTrue(Math.Abs(value.AsNumber() - 2.0f) < 0.0001f);
+        Assert.IsTrue(Math.Abs(value.AsNumber() - 3.0f) < 0.0001f);
     }
 
     [TestMethod]
@@ -72,9 +71,9 @@ public class FormulaEvaluateTest
     {
         const string formula = "sum(pe)";
 
-        var value = (Scalar)TestEval(formula);
+        var value = (Scalar)TestRuntime.Eval(formula);
 
-        Assert.IsTrue(Math.Abs(value.AsNumber() - 4.0f) < 0.0001f);
+        Assert.IsTrue(Math.Abs(value.AsNumber() - 5.0f) < 0.0001f);
     }
 
     [TestMethod]
@@ -82,7 +81,7 @@ public class FormulaEvaluateTest
     {
         const string formula = "rank(-price)";
 
-        var value = (Vector)TestEval(formula);
+        var value = (Vector)TestRuntime.Eval(formula);
 
         Assert.AreEqual(1, value.AsInteger()["000001"]);
     }
@@ -92,17 +91,8 @@ public class FormulaEvaluateTest
     {
         const string formula = "avail(rank(-price), 1000)";
 
-        var value = (Vector)TestEval(formula);
+        var value = (Vector)TestRuntime.Eval(formula);
 
         Assert.AreEqual(1000, value.Values["688001"]);
-    }
-
-    private static IValue TestEval(string formula)
-    {
-        var runtime = TestRuntime.Get();
-
-        var expression = HuskyParser.Parse(formula, runtime);
-
-        return runtime.Eval(expression);
     }
 }
