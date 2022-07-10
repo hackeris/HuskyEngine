@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using HuskyEngine.Api.Dto;
 using HuskyEngine.Api.Dto.Request;
+using HuskyEngine.Api.Dto.Response;
 using HuskyEngine.Engine;
 using HuskyEngine.Engine.Types;
 using HuskyEngine.Engine.Value;
@@ -22,12 +22,12 @@ public class ComputeController : ControllerBase
     }
 
     [HttpGet]
-    public ComputeResult Compute(string formula, DateTime date)
+    public ComputeResultDto Compute(string formula, DateTime date)
     {
-        return Compute(formula, date);
+        return Compute(formula, date, false);
     }
 
-    private ComputeResult Compute(string formula, DateTime date, bool boolAsNumber)
+    private ComputeResultDto Compute(string formula, DateTime date, bool strictType)
     {
         var evaluator = _evaluator.At(date);
 
@@ -52,7 +52,7 @@ public class ComputeController : ControllerBase
         var rawValue = value switch
         {
             Scalar s => s.Value,
-            Vector v => (boolAsNumber, v.ElementType) switch
+            Vector v => (strictType, v.ElementType) switch
             {
                 (true, PrimitiveType.Boolean) =>
                     v.AsBoolean()
@@ -63,7 +63,7 @@ public class ComputeController : ControllerBase
             _ => throw new Exception($"Unexpected value type {value.Type}")
         };
 
-        return new ComputeResult
+        return new ComputeResultDto
         {
             Date = date.ToString("yyyy-MM-dd"),
             Formula = formula,
@@ -73,8 +73,8 @@ public class ComputeController : ControllerBase
     }
 
     [HttpPost]
-    public ComputeResult Compute(ComputeRequest request)
+    public ComputeResultDto Compute(ComputeRequestDto request)
     {
-        return Compute(request.Formula, request.Date, request.BoolAsNumber);
+        return Compute(request.Formula, request.Date, request.StrictType);
     }
 }

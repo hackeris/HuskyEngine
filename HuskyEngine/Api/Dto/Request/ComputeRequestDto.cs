@@ -2,9 +2,9 @@
 
 namespace HuskyEngine.Api.Dto.Request;
 
-public class ComputeRequest
+public class ComputeRequestDto
 {
     [JsonPropertyName("date")] public DateTime Date { get; set; }
     [JsonPropertyName("formula")] public string Formula { get; set; }
-    [JsonPropertyName("bool_as_number")] public bool BoolAsNumber { get; set; } = true;
+    [JsonPropertyName("strict_type")] public bool StrictType { get; set; } = true;
 }

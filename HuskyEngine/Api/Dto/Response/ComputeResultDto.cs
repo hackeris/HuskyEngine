@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace HuskyEngine.Api.Dto;
+namespace HuskyEngine.Api.Dto.Response;
 
-public class ComputeResult
+public class ComputeResultDto
 {
     [JsonPropertyName("date")] public string Date { get; set; }
     [JsonPropertyName("formula")] public string Formula { get; set; }

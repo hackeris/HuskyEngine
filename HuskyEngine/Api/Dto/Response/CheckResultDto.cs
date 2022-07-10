@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace HuskyEngine.Api.Dto;
+namespace HuskyEngine.Api.Dto.Response;
 
-public class CheckResult
+public class CheckResultDto
 {
     [JsonPropertyName("errors")] public List<Item> Errors { get; set; }
 

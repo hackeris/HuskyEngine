@@ -1,4 +1,4 @@
-﻿using HuskyEngine.Api.Dto;
+﻿using HuskyEngine.Api.Dto.Response;
 using HuskyEngine.Engine;
 using HuskyEngine.Engine.Parser.Errors;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +19,7 @@ public class CheckController : ControllerBase
     }
 
     [HttpGet]
-    public CheckResult Check(string formula)
+    public CheckResultDto Check(string formula)
     {
         var runtime = _evaluatorFactory.At(DateTime.Today);
 
@@ -29,7 +29,7 @@ public class CheckController : ControllerBase
 
             _logger.LogInformation("Check formula '{Formula}' success", formula);
 
-            return new CheckResult { Errors = new() };
+            return new CheckResultDto { Errors = new() };
         }
         catch (ParsingError e)
         {
@@ -37,9 +37,9 @@ public class CheckController : ControllerBase
                 "Error checking formula '{Formula}', {Error}",
                 formula, e.ToString());
 
-            return new CheckResult
+            return new CheckResultDto
             {
-                Errors = new List<CheckResult.Item>
+                Errors = new List<CheckResultDto.Item>
                 {
                     new()
                     {

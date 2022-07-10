@@ -14,7 +14,10 @@ public static class Definition
             UnaryFunction.GetDefines(),
             Sum.GetDefines(),
             Rank.GetDefines(),
-            Avail.GetDefines()
+            Avail.GetDefines(),
+            Avg.GetDefines(),
+            Std.GetDefines(),
+            ZScore.GetDefines()
         }.Aggregate((a, b) => a.Union(b).ToList());
     }
 }
