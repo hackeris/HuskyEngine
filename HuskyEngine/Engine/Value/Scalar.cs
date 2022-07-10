@@ -43,4 +43,21 @@ public class Scalar : IValue
     {
         return (float)Value;
     }
+
+    public Scalar CastTo(PrimitiveType type)
+    {
+        if (ValueType == type)
+        {
+            return this;
+        }
+
+        return (ValueType, type) switch
+        {
+            (PrimitiveType.Integer, PrimitiveType.Number) =>
+                new Scalar((float)(int)Value),
+            (PrimitiveType.Number, PrimitiveType.Integer) =>
+                new Scalar((int)(float)Value),
+            _ => throw new Exception($"Cast {ValueType} to {type} is not supported")
+        };
+    }
 }

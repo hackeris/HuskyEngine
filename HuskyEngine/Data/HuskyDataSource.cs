@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using HuskyEngine.Data.Cache;
 using HuskyEngine.Data.Model;
 using Microsoft.EntityFrameworkCore;
@@ -135,8 +136,18 @@ public class HuskyDataSource : IDataSource
     {
         var dateString = referenceDate.ToString("s");
 
-        var sql = symbols
-            .Select(symbol => String.Format(
+        var builder = new StringBuilder(320 * symbols.Length);
+
+        for (var i = 0; i < symbols.Length; i += 1)
+        {
+            if (i != 0)
+            {
+                builder.Append(" UNION ");
+            }
+
+            var symbol = symbols[i];
+            builder.Append('(');
+            builder.Append(String.Format(
                 @"SELECT 
                     * 
                 FROM financial_factor_data 
@@ -150,10 +161,12 @@ public class HuskyDataSource : IDataSource
                 dateString,
                 queryOffset * 3 + 12,
                 queryOffset
-            ))
-            .Select(s => $"({s})")
-            .Aggregate((a, b) => $"{a} UNION {b}");
+            ));
+            builder.Append(')');
+        }
 
+        var sql = builder.ToString();
+        
         return _dbContext.FinancialFactorData
             .FromSqlRaw(sql)
             .ToList();

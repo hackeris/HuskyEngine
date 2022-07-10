@@ -7,16 +7,16 @@ namespace HuskyEngine.Engine.Lib.Function;
 
 public class Avail : IFunction
 {
-    private Avail(PrimitiveType elementType)
+    private Avail(PrimitiveType elementType, PrimitiveType defaultType)
     {
         Type = new VectorType(elementType);
-        ArgTypes = new List<IType> { Type, new ScalarType(elementType) };
+        ArgTypes = new List<IType> { Type, new ScalarType(defaultType) };
     }
 
     public IValue Call(IRuntime runtime, List<IExpression> arguments)
     {
         var vector = (Vector)runtime.Eval(arguments[0]);
-        var defaultValue = (Scalar)runtime.Eval(arguments[1]);
+        var defaultValue = ((Scalar)runtime.Eval(arguments[1])).CastTo(vector.ElementType);
 
         var zeros = Zeros(runtime);
 
@@ -37,8 +37,10 @@ public class Avail : IFunction
     {
         var availDefines = new List<Avail>
         {
-            new(PrimitiveType.Integer),
-            new(PrimitiveType.Number)
+            new(PrimitiveType.Integer, PrimitiveType.Integer),
+            new(PrimitiveType.Number, PrimitiveType.Number),
+            new(PrimitiveType.Number, PrimitiveType.Integer),
+            new(PrimitiveType.Integer, PrimitiveType.Number),
         };
         return availDefines
             .Select(func => new IFunction.Def { Name = "avail", Function = func })
