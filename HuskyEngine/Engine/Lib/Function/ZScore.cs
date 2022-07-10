@@ -8,9 +8,9 @@ namespace HuskyEngine.Engine.Lib.Function;
 
 public class ZScore : IFunction
 {
-    private ZScore(List<IType> argTypes, IType type)
+    private ZScore(List<IType> argTypes)
     {
-        Type = type;
+        Type = new VectorType(PrimitiveType.Number);
         ArgTypes = argTypes;
     }
 
@@ -25,7 +25,12 @@ public class ZScore : IFunction
             (Vector)runtime.Eval(arguments[0]),
             (Vector)runtime.Eval(arguments[1])
         );
-        return ZScoreVector(masked);
+
+        var result = ZScoreVector(masked);
+
+        return arguments.Count == 3
+            ? Cap.CapVector(result, (Scalar)runtime.Eval(arguments[2]))
+            : result;
     }
 
     private static Vector ZScoreVector(Vector vector)
@@ -77,15 +82,19 @@ public class ZScore : IFunction
     {
         var intVector = new VectorType(PrimitiveType.Integer);
         var numberVector = new VectorType(PrimitiveType.Number);
+        var intScalar = new ScalarType(PrimitiveType.Integer);
+        var numberScalar = new ScalarType(PrimitiveType.Number);
 
         var boolVector = new VectorType(PrimitiveType.Boolean);
 
         var functions = new List<ZScore>
         {
-            new(new List<IType> { intVector }, numberVector),
-            new(new List<IType> { numberVector }, numberVector),
-            new(new List<IType> { intVector, boolVector }, numberVector),
-            new(new List<IType> { numberVector, boolVector }, numberVector),
+            new(new List<IType> { intVector }),
+            new(new List<IType> { numberVector }),
+            new(new List<IType> { intVector, boolVector }),
+            new(new List<IType> { numberVector, boolVector }),
+            new(new List<IType> { numberVector, boolVector, intScalar }),
+            new(new List<IType> { numberVector, boolVector, numberScalar }),
         };
 
         return functions

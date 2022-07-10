@@ -21,19 +21,40 @@ public class Cap : IFunction
         return CapVector(vector, min, max);
     }
 
-    private IValue CapVector(Vector vector, Scalar min, Scalar max)
+    public static IValue CapVector(Vector vector, Scalar maxAbs)
     {
-        return Type switch
+        var min = maxAbs switch
+        {
+            { ValueType: PrimitiveType.Integer, Value: var value } =>
+                new Scalar(-(int)value),
+            { ValueType: PrimitiveType.Number, Value: var value } =>
+                new Scalar(-(float)value),
+            _ => throw new Exception("Unsupported")
+        };
+        return CapVector(vector, min, maxAbs);
+    }
+
+    private static IValue CapVector(Vector vector, Scalar min, Scalar max)
+    {
+        return vector.Type switch
         {
             VectorType { ElementType: PrimitiveType.Integer } =>
-                new Vector(CapVector(vector.AsInteger(), min.AsInteger(), max.AsInteger())),
+                new Vector(CapVector(
+                    vector.AsInteger(),
+                    min.CastTo(PrimitiveType.Integer).AsInteger(),
+                    max.CastTo(PrimitiveType.Integer).AsInteger()
+                )),
             VectorType { ElementType: PrimitiveType.Number } =>
-                new Vector(CapVector(vector.AsNumber(), min.AsNumber(), max.AsNumber())),
+                new Vector(CapVector(
+                    vector.AsNumber(),
+                    min.CastTo(PrimitiveType.Number).AsNumber(),
+                    max.CastTo(PrimitiveType.Number).AsNumber()
+                )),
             _ => throw new Exception("Unsupported")
         };
     }
 
-    private Dictionary<string, T> CapVector<T>(Dictionary<string, T> values, T min, T max)
+    private static Dictionary<string, T> CapVector<T>(Dictionary<string, T> values, T min, T max)
         where T : IComparable<T>
     {
         return values

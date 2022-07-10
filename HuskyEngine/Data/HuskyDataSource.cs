@@ -149,6 +149,11 @@ public class HuskyDataSource : IDataSource
         int queryOffset
     )
     {
+        var scopedPrevious = factorId != 470;
+        var offsetLimit = scopedPrevious 
+            ? queryOffset * 3 + 12
+            : 10000;
+
         var dateString = referenceDate.ToString("s");
 
         var builder = new StringBuilder(320 * symbols.Length);
@@ -162,7 +167,7 @@ public class HuskyDataSource : IDataSource
 
             var symbol = symbols[i];
             builder.Append('(');
-            builder.Append(String.Format(
+            builder.Append(string.Format(
                 @"SELECT 
                     * 
                 FROM financial_factor_data 
@@ -174,7 +179,7 @@ public class HuskyDataSource : IDataSource
                 factorId,
                 symbol,
                 dateString,
-                queryOffset * 3 + 12,
+                offsetLimit,
                 queryOffset
             ));
             builder.Append(')');

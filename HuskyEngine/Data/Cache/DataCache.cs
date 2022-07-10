@@ -9,7 +9,7 @@ public class DataCache
 
     public DataCache()
     {
-        _sizeLimit = 20000;
+        _sizeLimit = 10000;
         _cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = _sizeLimit });
     }
 
