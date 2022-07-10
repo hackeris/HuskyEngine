@@ -1,5 +1,4 @@
-﻿using HuskyEngine.Api.Dto.Response;
-using HuskyEngine.Api.Dto.Response.Check;
+﻿using HuskyEngine.Api.Dto.Response.Check;
 using HuskyEngine.Engine;
 using HuskyEngine.Engine.Parser.Errors;
 using Microsoft.AspNetCore.Mvc;
@@ -11,18 +10,18 @@ namespace HuskyEngine.Api.Controllers;
 public class CheckController : ControllerBase
 {
     private readonly ILogger<CheckController> _logger;
-    private readonly EvaluatorFactory _evaluatorFactory;
+    private readonly EvaluatorFactory _evaluator;
 
-    public CheckController(ILogger<CheckController> logger, EvaluatorFactory evaluatorFactory)
+    public CheckController(ILogger<CheckController> logger, EvaluatorFactory evaluator)
     {
         _logger = logger;
-        _evaluatorFactory = evaluatorFactory;
+        _evaluator = evaluator;
     }
 
     [HttpGet]
     public CheckResultDto Check(string formula)
     {
-        var runtime = _evaluatorFactory.At(DateTime.Today);
+        var runtime = _evaluator.At(DateTime.Today);
 
         try
         {

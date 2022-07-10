@@ -2,7 +2,7 @@
 
 namespace HuskyEngine.Api.Dto.Response.Health;
 
-public class CacheStatus
+public class CacheStatusDto
 {
     [JsonPropertyName("maxSize")]
     public int MaxSize { get; set; }

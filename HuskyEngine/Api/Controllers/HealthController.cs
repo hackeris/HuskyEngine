@@ -16,9 +16,9 @@ public class HealthController : ControllerBase
 
     [HttpGet]
     [Route("/api/health/cache")]
-    public CacheStatus CheckCache()
+    public CacheStatusDto CheckCache()
     {
-        return new CacheStatus
+        return new CacheStatusDto
         {
             MaxSize = _cache.MaxSize(),
             Used = _cache.Used()
